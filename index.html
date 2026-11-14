@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Gaming Tournament & AI Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#09090b',
+                        cardBg: '#121216',
+                        neonRed: '#ff1e1e',
+                        deepRed: '#990000',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Neon Side Borders */
+        .neon-border-left {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff1e1e, #ff6b6b, #ff1e1e);
+            box-shadow: 0 0 15px #ff1e1e, 0 0 30px #ff1e1e;
+            z-index: 9999;
+            animation: pulseNeon 2s infinite alternate;
+        }
+
+        .neon-border-right {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff1e1e, #ff6b6b, #ff1e1e);
+            box-shadow: 0 0 15px #ff1e1e, 0 0 30px #ff1e1e;
+            z-index: 9999;
+            animation: pulseNeon 2s infinite alternate;
+        }
+
+        @keyframes pulseNeon {
+            0% { opacity: 0.6; filter: brightness(0.8); }
+            100% { opacity: 1; filter: brightness(1.3); }
+        }
+
+        /* Rain Animation Canvas */
+        #rain-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff1e1e;
+            border-radius: 3px;
+        }
+
+        .glass-panel {
+            background: rgba(18, 18, 22, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 30, 30, 0.2);
+        }
+
+        .glow-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 30, 30, 0.4);
+        }
+        .glow-button:hover {
+            box-shadow: 0 0 20px rgba(255, 30, 30, 0.8), 0 0 30px rgba(255, 30, 30, 0.4);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between">
+
+    <!-- Glowing Neon Side Lines -->
+    <div class="neon-border-left"></div>
+    <div class="neon-border-right"></div>
+
+    <!-- Falling Rain Canvas -->
+    <canvas id="rain-canvas"></canvas>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex-grow flex flex-col">
+
+        <!-- ================= 1. REGISTRATION VIEW ================= -->
+        <div id="view-register" class="flex-grow flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-md p-8 rounded-2xl shadow-2xl border border-red-900/40 relative">
+                <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-darkBg border-2 border-neonRed rounded-full flex items-center justify-center shadow-lg shadow-red-950">
+                    <i class="fa-solid fa-crown text-3xl text-neonRed animate-bounce"></i>
+                </div>
+                <div class="text-center mt-6 mb-8">
+                    <h1 class="text-3xl font-extrabold tracking-wider text-white">VIP <span class="text-neonRed">TOURNAMENT</span></h1>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Elite Gaming & AI Companion Hub</p>
+                </div>
+                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Player Username</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" id="reg-username" required placeholder="e.g. VIP_Shadow" class="w-full bg-black/60 border border-gray-800 rounded-lg py-3 pl-10 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-neonRed transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Free Fire UID / Game ID</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-gamepad"></i></span>
+                            <input type="text" id="reg-uid" required placeholder="e.g. 849204921" class="w-full bg-black/60 border border-gray-800 rounded-lg py-3 pl-10 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-neonRed transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Phone / WhatsApp Number</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><i class="fa-solid fa-phone"></i></span>
+                            <input type="tel" id="reg-phone" required placeholder="e.g. 017XXXXXXXX" class="w-full bg-black/60 border border-gray-800 rounded-lg py-3 pl-10 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-neonRed transition">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 font-bold rounded-lg uppercase tracking-wider text-white glow-button transition">
+                        Enter VIP Arena <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+                <!-- Hidden Secret Admin Access Trigger (Bottom Left Corner of Card) -->
+                <div class="mt-6 flex justify-between items-center text-xs text-gray-600">
+                    <span>Secure v3.4</span>
+                    <button onclick="openPasswordModal()" class="hover:text-red-500 transition focus:outline-none">System Portal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 2. MAIN DASHBOARD VIEW ================= -->
+        <div id="view-dashboard" class="hidden flex-grow flex flex-col">
+            <!-- Top Navbar -->
+            <header class="glass-panel border-b border-red-950 px-6 py-4 sticky top-0 z-50 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-red-950/50 border border-neonRed flex items-center justify-center text-neonRed font-bold text-lg">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-white tracking-wide text-sm sm:text-base" id="nav-username">VIP Player</h2>
+                        <span class="text-xs text-neonRed font-medium flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span> Online Member</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="hidden md:flex items-center space-x-1 bg-black/40 p-1 rounded-xl border border-gray-800">
+                    <button onclick="switchTab('tournaments')" id="tab-btn-tournaments" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-red-600/30 border border-neonRed/50 transition"><i class="fa-solid fa-trophy mr-1.5"></i> Tournaments</button>
+                    <button onclick="switchTab('ai')" id="tab-btn-ai" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition"><i class="fa-solid fa-robot mr-1.5"></i> AI Friends</button>
+                    <button onclick="switchTab('wallet')" id="tab-btn-wallet" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition"><i class="fa-solid fa-wallet mr-1.5"></i> Wallet (<span id="nav-wallet-bal">150</span> ৳)</button>
+                    <button onclick="switchTab('support')" id="tab-btn-support" class="px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition"><i class="fa-solid fa-headset mr-1.5"></i> BD Support</button>
+                </div>
+
+                <!-- Profile / Wallet Quick pill -->
+                <div class="flex items-center space-x-3">
+                    <div onclick="switchTab('wallet')" class="cursor-pointer bg-black/60 border border-gray-800 px-3 py-1.5 rounded-lg flex items-center space-x-2 text-xs">
+                        <i class="fa-solid fa-coins text-yellow-500"></i>
+                        <span class="font-bold text-white" id="header-wallet">150 ৳</span>
+                    </div>
+                    <button onclick="openPasswordModal()" class="text-gray-500 hover:text-red-500 p-2"><i class="fa-solid fa-lock text-xs"></i></button>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 pb-24">
+
+                <!-- TAB 1: TOURNAMENTS (HOME SCREEN) -->
+                <div id="tab-tournaments" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-red-950/40 to-black/60 border border-red-900/30 p-6 rounded-2xl">
+                        <div>
+                            <h2 class="text-2xl font-black text-white tracking-wide">LIVE VIP TOURNAMENTS</h2>
+                            <p class="text-xs text-gray-400 mt-1">Join 100 Taka entry matches. Room ID & Password auto-delivered post admin confirmation.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="bg-red-900/40 text-neonRed border border-red-700/50 text-xs px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-shield-halved mr-1"></i> Anti-Cheat Enabled</span>
+                        </div>
+                    </div>
+
+                    <!-- Tournament Cards Grid -->
+                    <div id="tournament-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamically populated or default items -->
+                    </div>
+                </div>
+
+                <!-- TAB 2: AI FRIENDS HUB -->
+                <div id="tab-ai" class="hidden space-y-6">
+                    <div class="bg-gradient-to-r from-red-950/40 to-black/60 border border-red-900/30 p-6 rounded-2xl">
+                        <h2 class="text-2xl font-black text-white tracking-wide flex items-center gap-2"><i class="fa-solid fa-brain text-neonRed"></i> AI Friends Squad (12 VIP Mentors)</h2>
+                        <p class="text-xs text-gray-400 mt-1">Select an AI companion below to instantly chat, get Free Fire tips, strategy advice, or talk about anything!</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <!-- AI Friends List Sidebar -->
+                        <div class="lg:col-span-1 glass-panel rounded-2xl p-4 space-y-3 h-[600px] overflow-y-auto" id="ai-list-container">
+                            <!-- Populated by JS -->
+                        </div>
+                        <!-- Active Chat Window -->
+                        <div class="lg:col-span-3 glass-panel rounded-2xl flex flex-col h-[600px] overflow-hidden">
+                            <!-- Chat Header -->
+                            <div class="bg-black/60 p-4 border-b border-red-950 flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-red-900/40 border border-neonRed flex items-center justify-center font-bold text-white" id="active-ai-avatar">⚡</div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm" id="active-ai-name">Select an AI Friend</h3>
+                                        <span class="text-xs text-green-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse"></span> Instant Reply Active</span>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-500 bg-black/40 px-3 py-1 rounded-full border border-gray-800" id="active-ai-specialty">General Expert</span>
+                            </div>
+                            <!-- Chat Messages Scroll Area -->
+                            <div id="ai-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-4 text-sm">
+                                <div class="flex justify-start">
+                                    <div class="bg-black/70 border border-red-950 text-gray-300 p-3 rounded-2xl max-w-md">
+                                        Hello! I am your AI companion here. Pick any of our 12 AI specialists on the left and ask me anything about Free Fire tactics, weapon skins, or strategy right now!
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Chat Input Box -->
+                            <div class="p-4 bg-black/60 border-t border-red-950">
+                                <form onsubmit="sendAIMessage(event)" class="flex gap-2">
+                                    <input type="text" id="ai-input" placeholder="Type your message to AI..." class="flex-grow bg-black/80 border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neonRed text-sm">
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 rounded-xl font-bold transition glow-button"><i class="fa-solid fa-paper-plane"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: WALLET SECTION -->
+                <div id="tab-wallet" class="hidden space-y-6 max-w-3xl mx-auto">
+                    <div class="glass-panel p-6 rounded-2xl relative overflow-hidden border border-red-900/40">
+                        <div class="absolute -right-10 -bottom-10 text-red-950/40 text-9xl font-black pointer-events-none">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white mb-2">My VIP Wallet</h2>
+                        <p class="text-xs text-gray-400 mb-6">Manage your Taka balance, top-up funds, and view transaction records.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-black/60 border border-gray-800 p-6 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-gray-400 uppercase tracking-wider">Available Balance</span>
+                                    <h3 class="text-3xl font-black text-white mt-1"><span id="wallet-balance-display">150</span> <span class="text-neonRed text-lg">৳</span></h3>
+                                </div>
+                                <div class="w-12 h-12 bg-red-950/50 border border-neonRed/50 rounded-xl flex items-center justify-center text-neonRed text-xl">
+                                    <i class="fa-solid fa-coins"></i>
+                                </div>
+                            </div>
+                            <div class="bg-black/60 border border-gray-800 p-6 rounded-xl flex flex-col justify-between">
+                                <span class="text-xs text-gray-400 uppercase tracking-wider mb-2">Quick Add Funds</span>
+                                <div class="flex gap-2">
+                                    <button onclick="topUpWallet(100)" class="flex-1 py-2.5 bg-red-950/60 border border-red-800 hover:bg-red-900 text-white text-xs font-bold rounded-lg transition">+100 ৳</button>
+                                    <button onclick="topUpWallet(500)" class="flex-1 py-2.5 bg-red-950/60 border border-red-800 hover:bg-red-900 text-white text-xs font-bold transition">+500 ৳</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction & Match Request History -->
+                    <div class="glass-panel p-6 rounded-2xl space-y-4">
+                        <h3 class="font-bold text-white text-sm tracking-wider uppercase">Match Registrations & Wallet History</h3>
+                        <div id="wallet-history-list" class="space-y-3">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: BD SUPPORT -->
+                <div id="tab-support" class="hidden space-y-6 max-w-3xl mx-auto">
+                    <div class="glass-panel p-6 rounded-2xl text-center space-y-4">
+                        <div class="w-16 h-16 mx-auto bg-red-950/50 border border-neonRed rounded-full flex items-center justify-center text-neonRed text-2xl animate-pulse">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <h2 class="text-2xl font-black text-white">BD Support Live Assistant</h2>
+                        <p class="text-xs text-gray-400 max-w-md mx-auto">Need help with bKash/Nagad top-ups, delayed room IDs, or match rules? Our BD Support team is online 24/7 to assist you instantly!</p>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col h-[450px]">
+                        <div id="support-chat-messages" class="flex-grow overflow-y-auto space-y-4 text-sm pr-2">
+                            <div class="flex justify-start">
+                                <div class="bg-black/70 border border-red-950 text-gray-300 p-3 rounded-2xl max-w-md">
+                                    <span class="text-xs font-bold text-neonRed block mb-1">BD Support Agent (Rahim)</span>
+                                    আসসালামু আলাইকুম! VIP সাপোর্ট সেন্টারে আপনাকে স্বাগতম। ওয়ালেট টপআপ বা ম্যাচ রুম আইডি নিয়ে কোনো সমস্যা হলে এখানে বলুন।
+                                </div>
+                            </div>
+                        </div>
+                        <form onsubmit="sendSupportMessage(event)" class="mt-4 flex gap-2 pt-3 border-t border-red-950">
+                            <input type="text" id="support-input" placeholder="Type message to BD Support..." class="flex-grow bg-black/80 border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neonRed text-sm">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 rounded-xl font-bold transition glow-button"><i class="fa-solid fa-paper-plane"></i></button>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Mobile Bottom Nav Bar -->
+            <div class="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-red-950 p-2 flex justify-around items-center z-50">
+                <button onclick="switchTab('tournaments')" id="m-tab-tournaments" class="flex flex-col items-center text-xs text-neonRed p-2"><i class="fa-solid fa-trophy text-lg mb-0.5"></i>Tournaments</button>
+                <button onclick="switchTab('ai')" id="m-tab-ai" class="flex flex-col items-center text-xs text-gray-400 p-2"><i class="fa-solid fa-robot text-lg mb-0.5"></i>AI Friends</button>
+                <button onclick="switchTab('wallet')" id="m-tab-wallet" class="flex flex-col items-center text-xs text-gray-400 p-2"><i class="fa-solid fa-wallet text-lg mb-0.5"></i>Wallet</button>
+                <button onclick="switchTab('support')" id="m-tab-support" class="flex flex-col items-center text-xs text-gray-400 p-2"><i class="fa-solid fa-headset text-lg mb-0.5"></i>BD Support</button>
+            </div>
+        </div>
+
+        <!-- ================= 3. SECRET ADMIN PANEL VIEW ================= -->
+        <div id="view-admin" class="hidden flex-grow flex flex-col p-4 sm:p-8 max-w-6xl mx-auto w-full">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 rounded-2xl mb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-white tracking-wider"><i class="fa-solid fa-shield-cat text-neonRed mr-2"></i> SECRET ADMIN PANEL</h2>
+                    <p class="text-xs text-gray-400 mt-1">Manage tournaments, add custom slots, and deliver Room ID & Password to registered users.</p>
+                </div>
+                <button onclick="logoutAdmin()" class="bg-red-950 border border-red-800 hover:bg-red-900 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition"><i class="fa-solid fa-arrow-left mr-1.5"></i> Exit Admin</button>
+            </div>
+
+            <!-- Admin Grid Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add New Tournament Form -->
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-red-950 pb-2"><i class="fa-solid fa-circle-plus text-neonRed mr-2"></i> Create New Match</h3>
+                    <form onsubmit="handleCreateTournament(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Tournament Title</label>
+                            <input type="text" id="admin-t-title" required placeholder="e.g. Squad Clash #50" class="w-full bg-black/80 border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-neonRed">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Map Type</label>
+                            <select id="admin-t-map" class="w-full bg-black/80 border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-neonRed">
+                                <option value="Bermuda">Bermuda (Full Map)</option>
+                                <option value="Purgatory">Purgatory</option>
+                                <option value="Kalahari">Kalahari</option>
+                                <option value="Alpine">Alpine</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Entry Fee (৳)</label>
+                                <input type="number" id="admin-t-fee" value="100" readonly class="w-full bg-black/80 border border-gray-800 rounded-lg p-3 text-white text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Prize Pool (৳)</label>
+                                <input type="text" id="admin-t-prize" required value="400 ৳" class="w-full bg-black/80 border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-neonRed">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Match Time</label>
+                            <input type="text" id="admin-t-time" required placeholder="Today, 9:00 PM" class="w-full bg-black/80 border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-neonRed">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-700 font-bold text-white text-xs uppercase tracking-wider rounded-lg glow-button transition">Publish Match Slot</button>
+                    </form>
+                </div>
+
+                <!-- Match Registrations & Credentials Dispatcher -->
+                <div class="lg:col-span-2 glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-red-950 pb-2"><i class="fa-solid fa-list-check text-neonRed mr-2"></i> Pending Match Requests & Room Delivery</h3>
+                    <div id="admin-requests-list" class="space-y-3 max-h-[500px] overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Password Modal for Secret Admin Panel -->
+    <div id="password-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm p-6 rounded-2xl border border-red-900 space-y-4 relative">
+            <button onclick="closePasswordModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-red-950 border border-neonRed rounded-full mx-auto flex items-center justify-center text-neonRed mb-3">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="font-bold text-white text-lg">System Verification</h3>
+                <p class="text-xs text-gray-400 mt-1">Enter your 3-digit access code</p>
+            </div>
+            <form onsubmit="handlePasswordSubmit(event)" class="space-y-4">
+                <input type="password" id="admin-pass-input" maxlength="3" required placeholder="---" class="w-full bg-black/90 border border-gray-800 rounded-xl py-3 text-center tracking-[1em] text-xl font-bold text-white placeholder-gray-700 focus:outline-none focus:border-neonRed">
+                <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-700 font-bold text-white text-xs uppercase tracking-wider rounded-xl glow-button transition">Verify Access</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Box -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[99999] space-y-2 pointer-events-none"></div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-4 text-xs text-gray-600 border-t border-red-950/60 bg-black/40">
+        VIP Tournament System &copy; 2026. All Rights Reserved. Secure Anti-Cheat Protected.
+    </footer>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // --- State Management ---
+        let appState = {
+            user: null,
+            wallet: 150,
+            activeAiId: 1,
+            tournaments: [
+                { id: 1, title: "VIP Grand Battle #101", map: "Bermuda", fee: 100, prize: "400 ৳", time: "Tonight, 9:00 PM", slots: "18/48", status: "Open" },
+                { id: 2, title: "High Roller Squad #42", map: "Purgatory", fee: 100, prize: "450 ৳", time: "Tonight, 10:30 PM", slots: "32/48", status: "Open" },
+                { id: 3, title: "Elite Solo Showdown", map: "Kalahari", fee: 100, prize: "350 ৳", time: "Tomorrow, 3:00 PM", slots: "12/48", status: "Open" }
+            ],
+            matchRequests: [
+                { id: 101, username: "VIP_Shadow", uid: "849204921", tournament: "VIP Grand Battle #101", status: "Pending", roomId: "", roomPass: "" }
+            ],
+            transactions: [
+                { id: 1, type: "Welcome Bonus", amount: "+150 ৳", date: "Just now", status: "Success" }
+            ],
+            aiFriends: [
+                { id: 1, name: "AI Viper (Captain)", specialty: "Pro Squad Leader", avatar: "🦅", bio: "Expert in rush gameplay, team coordination, and aggressive formations." },
+                { id: 2, name: "AI Sniper Ghost", specialty: "Long Range & AWM Master", avatar: "🎯", bio: "Master of AWM, Kar98k, and precise positioning on high grounds." },
+                { id: 3, name: "AI Medic Nova", specialty: "Survival & Zone Rotations", avatar: "💊", bio: "Guiding you through safe zone timings and emergency heals." },
+                { id: 4, name: "AI Rush King", specialty: "Close Combat & Gloo Walls", avatar: "🔥", bio: "Teaches instant gloo wall placement and shotgun one-taps." },
+                { id: 5, name: "AI Luna", specialty: "Character Skills Combo", avatar: "⚡", bio: "Optimizes Alok, Chrono, K, and Kelly skill synergies." },
+                { id: 6, name: "AI Cyber Titan", specialty: "Tournament Rules & Tactics", avatar: "🛡️", bio: "Advises on esports tournament formats and scoring metrics." },
+                { id: 7, name: "AI Apex", specialty: "Headshot Sensitivity Setup", avatar: "⚙️", bio: "Gives best DPI and custom HUD settings for smooth headshots." },
+                { id: 8, name: "AI Spark", specialty: "Strategy & Map Control", avatar: "🗺️", bio: "Controls factory, clock tower, and peak landing strategies." },
+                { id: 9, name: "AI Echo", specialty: "General Assistant", avatar: "🤖", bio: "Answers quick questions regarding bKash, Nagad, and app support." },
+                { id: 10, name: "AI Blitz", specialty: "Character Speed Builds", avatar: "💨", bio: "Focuses on fast movement speed and rapid flanking." },
+                { id: 11, name: "AI Shadow", specialty: "Stealth & Camp Breaker", avatar: "🥷", bio: "Helps detect camping enemies and silent footstep analysis." },
+                { id: 12, name: "AI Zen", specialty: "Mental Focus & Clutch", avatar: "🧘", bio: "Keeps your cool during 1v4 clutch situations." }
+            ],
+            supportMessages: []
+        };
+
+        // --- Rain Animation Effect ---
+        const canvas = document.getElementById('rain-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const raindrops = [];
+        for (let i = 0; i < 70; i++) {
+            raindrops.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 20 + 10,
+                speed: Math.random() * 7 + 4,
+                opacity: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function animateRain() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 1;
+            ctx.lineCap = 'round';
+
+            for (let drop of raindrops) {
+                ctx.strokeStyle = `rgba(255, 30, 30, ${drop.opacity})`;
+                ctx.beginPath();
+                ctx.moveTo(drop.x, drop.y);
+                ctx.lineTo(drop.x - 1, drop.y + drop.length);
+                ctx.stroke();
+
+                drop.y += drop.speed;
+                drop.x -= 0.3;
+
+                if (drop.y > canvas.height) {
+                    drop.y = -20;
+                    drop.x = Math.random() * canvas.width;
+                }
+            }
+            requestAnimationFrame(animateRain);
+        }
+        animateRain();
+
+        // --- Registration Flow ---
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const uid = document.getElementById('reg-uid').value;
+            const phone = document.getElementById('reg-phone').value;
+
+            appState.user = { username, uid, phone };
+            document.getElementById('nav-username').innerText = username;
+
+            // Switch to dashboard
+            document.getElementById('view-register').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.remove('hidden');
+
+            renderTournaments();
+            renderAiList();
+            renderWallet();
+            showToast("Welcome to VIP Arena, " + username + "!", "success");
+        }
+
+        // --- Navigation Switcher ---
+        function switchTab(tabName) {
+            const tabs = ['tournaments', 'ai', 'wallet', 'support'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const mBtn = document.getElementById(`m-tab-${t}`);
+                if (t === tabName) {
+                    el.classList.remove('hidden');
+                    if (btn) {
+                        btn.className = "px-4 py-2 rounded-lg text-xs font-semibold text-white bg-red-600/30 border border-neonRed/50 transition";
+                    }
+                    if (mBtn) {
+                        mBtn.className = "flex flex-col items-center text-xs text-neonRed p-2";
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    if (btn) {
+                        btn.className = "px-4 py-2 rounded-lg text-xs font-semibold text-gray-400 hover:text-white transition";
+                    }
+                    if (mBtn) {
+                        mBtn.className = "flex flex-col items-center text-xs text-gray-400 p-2";
+                    }
+                }
+            });
+        }
+
+        // --- Tournaments Rendering ---
+        function renderTournaments() {
+            const grid = document.getElementById('tournament-grid');
+            grid.innerHTML = "";
+
+            appState.tournaments.forEach(t => {
+                // Check if user already requested this match
+                const existingReq = appState.matchRequests.find(r => r.tournament === t.title && r.username === (appState.user ? appState.user.username : ''));
+                
+                let actionBtnHTML = "";
+                if (existingReq) {
+                    if (existingReq.status === 'Approved') {
+                        actionBtnHTML = `
+                            <div class="bg-green-950/40 border border-green-600/50 p-3 rounded-xl text-xs space-y-1">
+                                <span class="font-bold text-green-400 block"><i class="fa-solid fa-circle-check mr-1"></i> Room ID Assigned!</span>
+                                <p class="text-white"><strong>ID:</strong> ${existingReq.roomId} | <strong>Pass:</strong> ${existingReq.roomPass}</p>
+                            </div>
+                        `;
+                    } else {
+                        actionBtnHTML = `
+                            <div class="bg-yellow-950/40 border border-yellow-600/50 p-3 rounded-xl text-xs text-yellow-300 flex items-center justify-between">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> Request Pending (Admin confirming...)</span>
+                                <span class="animate-pulse">●</span>
+                            </div>
+                        `;
+                    }
+                } else {
+                    actionBtnHTML = `
+                        <button onclick="joinTournament(${t.id})" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-xs uppercase font-bold tracking-wider rounded-xl glow-button transition">
+                            Join Match (100 ৳)
+                        </button>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = "glass-panel p-6 rounded-2xl border border-red-900/30 flex flex-col justify-between space-y-4 hover:border-red-600/50 transition";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="bg-red-950/60 border border-red-800 text-neonRed text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${t.map}</span>
+                            <span class="text-xs text-gray-400"><i class="fa-solid fa-users mr-1"></i> ${t.slots}</span>
+                        </div>
+                        <h3 class="font-black text-lg text-white">${t.title}</h3>
+                        <p class="text-xs text-gray-400 mt-1"><i class="fa-regular fa-clock mr-1"></i> ${t.time}</p>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-800 flex justify-between items-center text-xs">
+                        <div>
+                            <span class="text-gray-500 block">Entry Fee</span>
+                            <strong class="text-white text-sm">${t.fee} ৳</strong>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-gray-500 block">Prize Pool</span>
+                            <strong class="text-neonRed text-sm">${t.prize}</strong>
+                        </div>
+                    </div>
+                    ${actionBtnHTML}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function joinTournament(tId) {
+            const tournament = appState.tournaments.find(t => t.id === tId);
+            if (!tournament) return;
+
+            if (appState.wallet < tournament.fee) {
+                showToast("Insufficient balance! Please add funds in wallet.", "error");
+                switchTab('wallet');
+                return;
+            }
+
+            // Deduct entry fee
+            appState.wallet -= tournament.fee;
+            renderWallet();
+
+            // Add match request for admin
+            appState.matchRequests.push({
+                id: Date.now(),
+                username: appState.user.username,
+                uid: appState.user.uid,
+                tournament: tournament.title,
+                status: "Pending",
+                roomId: "",
+                roomPass: ""
+            });
+
+            appState.transactions.unshift({
+                id: Date.now(),
+                type: `Match Entry: ${tournament.title}`,
+                amount: `-${tournament.fee} ৳`,
+                date: "Just now",
+                status: "Pending Admin Delivery"
+            });
+
+            renderTournaments();
+            renderWallet();
+            renderAdminRequests();
+            showToast("Match joined successfully! Awaiting admin room credentials.", "success");
+        }
+
+        // --- Wallet Logic ---
+        function renderWallet() {
+            document.getElementById('wallet-balance-display').innerText = appState.wallet;
+            document.getElementById('nav-wallet-bal').innerText = appState.wallet;
+            document.getElementById('header-wallet').innerText = appState.wallet + " ৳";
+
+            const historyList = document.getElementById('wallet-history-list');
+            historyList.innerHTML = "";
+
+            if (appState.transactions.length === 0) {
+                historyList.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No recent transactions.</p>`;
+                return;
+            }
+
+            appState.transactions.forEach(tx => {
+                const item = document.createElement('div');
+                item.className = "bg-black/60 border border-gray-800 p-4 rounded-xl flex justify-between items-center text-xs";
+                item.innerHTML = `
+                    <div>
+                        <strong class="text-white block text-sm">${tx.type}</strong>
+                        <span class="text-gray-500">${tx.date}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold ${tx.amount.startsWith('+') ? 'text-green-400' : 'text-red-400'} text-sm block">${tx.amount}</span>
+                        <span class="text-[10px] text-yellow-500">${tx.status}</span>
+                    </div>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+
+        function topUpWallet(amount) {
+            appState.wallet += amount;
+            appState.transactions.unshift({
+                id: Date.now(),
+                type: `Wallet Top-Up (bKash/Nagad)`,
+                amount: `+${amount} ৳`,
+                date: "Just now",
+                status: "Success"
+            });
+            renderWallet();
+            showToast(`Successfully added ${amount} ৳ to your wallet!`, "success");
+        }
+
+        // --- AI Friends Hub Logic ---
+        function renderAiList() {
+            const container = document.getElementById('ai-list-container');
+            container.innerHTML = "";
+
+            appState.aiFriends.forEach(ai => {
+                const activeClass = ai.id === appState.activeAiId ? 'border-neonRed bg-red-950/40' : 'border-gray-800 bg-black/40 hover:border-gray-700';
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl border ${activeClass} cursor-pointer transition flex items-center space-x-3`;
+                div.onclick = () => selectAi(ai.id);
+                div.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-red-950 border border-neonRed/50 flex items-center justify-center text-lg flex-shrink-0">
+                        ${ai.avatar}
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 class="font-bold text-white text-xs truncate">${ai.name}</h4>
+                        <p class="text-[10px] text-gray-400 truncate">${ai.specialty}</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectAi(id) {
+            appState.activeAiId = id;
+            const ai = appState.aiFriends.find(a => a.id === id);
+            document.getElementById('active-ai-name').innerText = ai.name;
+            document.getElementById('active-ai-avatar').innerText = ai.avatar;
+            document.getElementById('active-ai-specialty').innerText = ai.specialty;
+            renderAiList();
+        }
+
+        function sendAIMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('ai-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const msgContainer = document.getElementById('ai-chat-messages');
+            
+            // Append User message
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex justify-end";
+            userDiv.innerHTML = `<div class="bg-red-600/30 border border-red-600/50 text-white p-3 rounded-2xl max-w-md">${escapeHtml(text)}</div>`;
+            msgContainer.appendChild(userDiv);
+            input.value = "";
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            // Instant AI Reply Generation
+            setTimeout(() => {
+                const ai = appState.aiFriends.find(a => a.id === appState.activeAiId);
+                const replies = [
+                    `That's a solid question about Free Fire! As your ${ai.specialty} mentor, I recommend practicing your reflex drills in training mode for 15 minutes before joining match lobbies.`,
+                    `Awesome point! Make sure you maintain high ground advantage and keep your gloo walls ready when enemy squads rush.`,
+                    `Understood! For maximum headshot precision with this weapon, lower your general scope sensitivity slightly.`,
+                    `I'm here for you 24/7! Let's get that Booyah! Need any specific weapon or character combo advice?`
+                ];
+                const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+                const aiDiv = document.createElement('div');
+                aiDiv.className = "flex justify-start";
+                aiDiv.innerHTML = `
+                    <div class="bg-black/70 border border-red-950 text-gray-300 p-3 rounded-2xl max-w-md space-y-1">
+                        <span class="text-[10px] font-bold text-neonRed block">${ai.name}</span>
+                        <p>${randomReply}</p>
+                    </div>
+                `;
+                msgContainer.appendChild(aiDiv);
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }, 600);
+        }
+
+        // --- BD Support Logic ---
+        function sendSupportMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('support-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const msgContainer = document.getElementById('support-chat-messages');
+            
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex justify-end";
+            userDiv.innerHTML = `<div class="bg-red-600/30 border border-red-600/50 text-white p-3 rounded-2xl max-w-md">${escapeHtml(text)}</div>`;
+            msgContainer.appendChild(userDiv);
+            input.value = "";
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            setTimeout(() => {
+                const supportDiv = document.createElement('div');
+                supportDiv.className = "flex justify-start";
+                supportDiv.innerHTML = `
+                    <div class="bg-black/70 border border-red-950 text-gray-300 p-3 rounded-2xl max-w-md space-y-1">
+                        <span class="text-[10px] font-bold text-neonRed block">BD Support Agent (Rahim)</span>
+                        <p>আপনার মেসেজটি আমরা পেয়েছি। অ্যাডমিন প্যানেল থেকে আপনার ওয়ালেট বা রুম আইডি চেক করা হচ্ছে। ১-২ মিনিটের মধ্যে সমাধান পাবেন ইনশাআল্লাহ।</p>
+                    </div>
+                `;
+                msgContainer.appendChild(supportDiv);
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }, 800);
+        }
+
+        // --- Secret Admin Modal & Authentication ---
+        function openPasswordModal() {
+            document.getElementById('password-modal').classList.remove('hidden');
+            document.getElementById('admin-pass-input').value = "";
+            document.getElementById('admin-pass-input').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.add('hidden');
+        }
+
+        function handlePasswordSubmit(e) {
+            e.preventDefault();
+            const pass = document.getElementById('admin-pass-input').value;
+            // 3-digit password is "VIP"
+            if (pass.toUpperCase() === "VIP") {
+                closePasswordModal();
+                // Hide all other views, show admin panel
+                document.getElementById('view-register').classList.add('hidden');
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-admin').classList.remove('hidden');
+                renderAdminRequests();
+                showToast("Admin access granted successfully.", "success");
+            } else {
+                showToast("Invalid 3-digit access password.", "error");
+                document.getElementById('admin-pass-input').value = "";
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('view-admin').classList.add('hidden');
+            if (appState.user) {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+            } else {
+                document.getElementById('view-register').classList.remove('hidden');
+            }
+            showToast("Logged out from admin panel.", "success");
+        }
+
+        // --- Admin Tournament Creation & Dispatch ---
+        function handleCreateTournament(e) {
+            e.preventDefault();
+            const title = document.getElementById('admin-t-title').value;
+            const map = document.getElementById('admin-t-map').value;
+            const prize = document.getElementById('admin-t-prize').value;
+            const time = document.getElementById('admin-t-time').value;
+
+            const newT = {
+                id: Date.now(),
+                title,
+                map,
+                fee: 100,
+                prize,
+                time,
+                slots: "0/48",
+                status: "Open"
+            };
+
+            appState.tournaments.unshift(newT);
+            renderTournaments();
+            document.getElementById('admin-t-title').value = "";
+            showToast("New tournament published successfully!", "success");
+        }
+
+        function renderAdminRequests() {
+            const list = document.getElementById('admin-requests-list');
+            list.innerHTML = "";
+
+            if (appState.matchRequests.length === 0) {
+                list.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No pending match requests.</p>`;
+                return;
+            }
+
+            appState.matchRequests.forEach(req => {
+                const div = document.createElement('div');
+                div.className = "bg-black/60 border border-gray-800 p-4 rounded-xl space-y-3";
+                
+                let actionHtml = "";
+                if (req.status === 'Approved') {
+                    actionHtml = `<span class="text-xs text-green-400 font-bold"><i class="fa-solid fa-check-circle"></i> Delivered (ID: ${req.roomId})</span>`;
+                } else {
+                    actionHtml = `
+                        <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                            <input type="text" id="r-id-${req.id}" placeholder="Room ID" class="bg-black border border-gray-700 rounded px-3 py-2 text-xs text-white">
+                            <input type="text" id="r-pass-${req.id}" placeholder="Room Pass" class="bg-black border border-gray-700 rounded px-3 py-2 text-xs text-white">
+                            <button onclick="deliverCredentials(${req.id})" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded text-xs">Send Room ID</button>
+                        </div>
+                    `;
+                }
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-neonRed text-[10px] font-bold uppercase tracking-wider">${req.tournament}</span>
+                            <h4 class="font-bold text-white text-sm">${req.username} <span class="text-gray-500 text-xs font-normal">(UID: ${req.uid})</span></h4>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 rounded ${req.status === 'Approved' ? 'bg-green-950 text-green-400 border border-green-800' : 'bg-yellow-950 text-yellow-400 border border-yellow-800'}">${req.status}</span>
+                    </div>
+                    ${actionHtml}
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function deliverCredentials(reqId) {
+            const rIdInput = document.getElementById(`r-id-${reqId}`).value.trim();
+            const rPassInput = document.getElementById(`r-pass-${reqId}`).value.trim();
+
+            if (!rIdInput || !rPassInput) {
+                showToast("Please enter both Room ID and Password.", "error");
+                return;
+            }
+
+            const req = appState.matchRequests.find(r => r.id === reqId);
+            if (req) {
+                req.status = "Approved";
+                req.roomId = rIdInput;
+                req.roomPass = rPassInput;
+
+                // Also update corresponding transaction status if any
+                renderAdminRequests();
+                renderTournaments();
+                showToast(`Room credentials successfully sent to ${req.username}!`, "success");
+            }
+        }
+
+        // --- Utility: Toast Notification ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `glass-panel px-4 py-3 rounded-xl border ${type === 'success' ? 'border-green-600 text-green-300' : 'border-red-600 text-red-300'} text-xs font-semibold shadow-xl flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-green-400' : 'fa-triangle-exclamation text-red-400'}"></i> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>
